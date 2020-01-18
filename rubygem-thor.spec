@@ -7,7 +7,7 @@
 Summary: Scripting framework that replaces rake, sake and rubigen
 Name: rubygem-%{gem_name}
 Version: 0.17.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 Group: Development/Languages
 License: MIT
 URL: http://whatisthor.com/
@@ -97,6 +97,9 @@ popd
 %doc %{gem_docdir}
 
 %changelog
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 0.17.0-3
+- Mass rebuild 2013-12-27
+
 * Thu Aug 01 2013 Vít Ondruch <vondruch@redhat.com> - 0.17.0-2
 - Fixed upstream source.
 
