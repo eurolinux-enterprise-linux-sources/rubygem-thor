@@ -4,10 +4,10 @@
 # There are not all test dependencies are available in RHEL.
 %global enable_test 0%{!?rhel:1}
 
-Summary: Scripting framework that replaces rake, sake and rubigen
+Summary: Thor is a toolkit for building powerful command-line interfaces
 Name: rubygem-%{gem_name}
-Version: 0.17.0
-Release: 3%{?dist}
+Version: 0.19.1
+Release: 1%{?dist}
 Group: Development/Languages
 License: MIT
 URL: http://whatisthor.com/
@@ -16,6 +16,7 @@ Requires: ruby(rubygems)
 Requires: ruby(release)
 BuildRequires: rubygems-devel
 BuildRequires: ruby(release)
+BuildRequires: ruby
 %if %{enable_test} > 0
 BuildRequires: rubygem(rspec)
 BuildRequires: rubygem(fakeweb)
@@ -25,7 +26,7 @@ BuildArch: noarch
 Provides: rubygem(%{gem_name}) = %{version}
 
 %description
-Thor is a scripting framework that replaces rake, sake and rubigen.
+Thor is a toolkit for building powerful command-line interfaces.
 
 %package doc
 Summary: Documentation for %{name}
@@ -62,14 +63,16 @@ find %{buildroot}%{gem_instdir}/bin -type f | \
 pushd .%{gem_instdir}
 
 # Drop bundler dependency
-sed -i "s/require 'bundler'//" Thorfile
+sed -i '/require "bundler"/ s/^/#/' Thorfile
 
 # kill simplecov dependency
-sed -i '3,7d' spec/spec_helper.rb
+sed -i '/simplecov/,/end/ s/^/#/' spec/helper.rb
 
-# This fixes on test failure due to encoding issues.
-# https://github.com/wycats/thor/issues/278
-sed -i '178 i\content.force_encoding "UTF-8"' spec/shell/basic_spec.rb
+# Fix failing tests
+# /components and .empty_directory are present in git under v0.18.1 tag,
+# but missing in .gem so the tests are failing
+mkdir spec/fixtures/doc/components
+touch spec/fixtures/doc/components/.empty_directory
 
 rspec spec
 popd
@@ -77,26 +80,27 @@ popd
 
 %files
 %{_bindir}/thor
-%{_bindir}/rake2thor
-%dir %{gem_instdir}
-%doc %{gem_instdir}/CHANGELOG.rdoc
 %doc %{gem_instdir}/LICENSE.md
-%doc %{gem_instdir}/README.md
-%exclude %{gem_instdir}/.*
+%dir %{gem_instdir}
 %{gem_instdir}/bin
 %{gem_libdir}
+%exclude %{gem_instdir}/.*
 %exclude %{gem_cache}
 %{gem_spec}
 
 %files doc
-%{gem_instdir}/Gemfile
-%{gem_instdir}/Thorfile
-%{gem_instdir}/thor.gemspec
-%{gem_instdir}/spec/
-%exclude %{gem_instdir}/spec/fixtures/doc/components/.empty_directory
 %doc %{gem_docdir}
+%doc %{gem_instdir}/CHANGELOG.md
+%doc %{gem_instdir}/README.md
+%{gem_instdir}/Thorfile
+%{gem_instdir}/spec
+%{gem_instdir}/thor.gemspec
 
 %changelog
+* Wed Apr 08 2015 <vondruch@redhat.com> - 0.19.1-1
+- Update to thor 1.19.1.
+  Resolves: rhbz#1209921
+
 * Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 0.17.0-3
 - Mass rebuild 2013-12-27
 
